@@ -1,17 +1,18 @@
 # cat build_dpdk.sh
 #!/bin/bash
 
-VERSION=20.08
-URL=http://fast.dpdk.org/rel/dpdk-$VERSION.tar.xz
+URL=http://fast.dpdk.org/rel/dpdk-$RTE_VERSION.tar.xz
 
-# Download/Build DPDK
 wget -q $URL
-tar xf dpdk-$VERSION.tar.xz
+tar xf dpdk-$RTE_VERSION.tar.xz
 
-cd dpdk-$VERSION
+cd dpdk-$RTE_VERSION
 meson build
 
 cd build
 ninja
 ninja install
 ldconfig
+
+cd ..
+export MAKE_PAUSE=n && make install T=$RTE_TARGET

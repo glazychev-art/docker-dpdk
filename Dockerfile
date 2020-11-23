@@ -1,27 +1,39 @@
 # cat Dockerfile
 # FROM registry.access.redhat.com/rhel7/rhel-tools
 # MAINTAINER jeder@redhat.com
-FROM ubuntu:latest
+FROM ubuntu:latest as dependencies
+
+# Uncomment to setup VFIO device
+#COPY ./setup_vfio.sh /root/setup_vfio.sh
+#RUN /root/setup_vfio.sh
 
 RUN apt-get update
 RUN apt-get -y install python3 \
                        meson \
                        ninja-build \
-                       linux-headers-$(uname -r) \
+                       libnuma-dev \
+#                       linux-headers-$(uname -r) \
                        wget \
                        build-essential
 
+# --- dpdk ---
+FROM dependencies as dpdk
+
 WORKDIR /root
 
-# Build DPDK and pktgen-dpdk for x86_64-native-linuxapp-gcc.
-COPY ./build_dpdk.sh /root/build_dpdk.sh
-RUN /root/build_dpdk.sh
+ENV RTE_VERSION=20.08
+ENV RTE_SDK=/root/dpdk-$RTE_VERSION
+ENV RTE_TARGET=x86_64-native-linux-gcc
 
-# Setup VFIO device
-COPY ./setup_vfio.sh /root/setup_vfio.sh
-RUN /root/setup_vfio.sh
+COPY ./build_dpdk.sh ./build_dpdk.sh
+RUN ./build_dpdk.sh
 
-COPY ./pingpong /root/pingpong
+# --- ping pong ---
+FROM dpdk as pingpong
 
-# Defaults to a bash shell, you could put your DPDK-based application here.
+COPY ./dpdk-pingpong ./dpdk-pingpong
+WORKDIR /root/dpdk-pingpong
+
+RUN make
+
 CMD ["/usr/bin/bash"]
