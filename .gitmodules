@@ -1,3 +1,3 @@
 [submodule "dpdk-pingpong"]
 	path = dpdk-pingpong
-	url = git@github.com:Bolodya1997/dpdk-pingpong.git
+	url = git@github.com:glazychev-art/dpdk-pingpong.git
