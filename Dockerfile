@@ -7,8 +7,10 @@ FROM ubuntu:latest as dependencies
 #COPY ./setup_vfio.sh /root/setup_vfio.sh
 #RUN /root/setup_vfio.sh
 
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
-RUN apt-get -y install python3 \
+RUN apt-get -y install pkg-config \
+                       python3 \
                        meson \
                        ninja-build \
                        libnuma-dev \
@@ -21,8 +23,8 @@ FROM dependencies as dpdk
 
 WORKDIR /root
 
-ENV RTE_VERSION=20.08
-ENV RTE_SDK=/root/dpdk-$RTE_VERSION
+ENV RTE_VERSION=20.11.6
+ENV RTE_SDK=/root/dpdk-stable-$RTE_VERSION
 ENV RTE_TARGET=x86_64-native-linux-gcc
 
 COPY ./build_dpdk.sh ./build_dpdk.sh
